@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do App</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        position: relative;
+    }
+
+    .topnav {
+        background-color: #333;
+        overflow: hidden;
+    }
+
+    .topnav a {
+        float: left;
+        display: block;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+    }
+
+    .topnav a:hover {
+        background-color: #ddd;
+        color: black;
+    }
+
+    .topnav a.icon {
+        display: none;
+    }
+
+    .add-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.3s;
+    }
+
+    .add-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .add-btn i {
+        margin-top: 2px;
+    }
+
+    .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.3s;
+        max-width: 400px;
+        width: 90%;
+    }
+
+    .popup.show {
+        display: block;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .popup .btn-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 20px;
+        color: #888;
+        cursor: pointer;
+    }
+
+    .popup input[type="text"],
+    .popup textarea {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .popup button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+
+    .todo-list {
+        margin-top: 20px;
+    }
+
+    .todo-item {
+        background-color: #fff;
+        padding: 20px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .todo-item h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+
+    .todo-item p {
+        margin: 0;
+    }
+
+    .todo-item .date {
+        font-size: 12px;
+        color: #888;
+    }
+
+    .todo-item .remove-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+    .todo-item .remove-btn:hover {
+        background-color: #c82333;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="topnav" id="myTopnav">
+    <a href="#" class="active"><i class="fas fa-home"></i></a>
+    <a href="#"><i class="fas fa-info-circle"></i></a>
+    <a href="#"><i class="fas fa-address-book"></i></a>
+    <a href="#"><i class="fas fa-gamepad"></i></a>
+    <a href="#"><i class="fas fa-briefcase"></i></a>
+    <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+        <i class="fas fa-bars"></i>
+    </a>
+</div>
+
+<div class="todo-list">
+    <!-- To-Do items will be dynamically added here -->
+</div>
+
+<div class="add-btn" id="addTodoBtn">
+    <i class="fas fa-plus"></i>
+</div>
+
+<div class="popup" id="popup">
+    <span class="btn-close" onclick="closePopup()">&times;</span>
+    <input type="text" id="todoTitle" placeholder="Title">
+    <textarea id="todoDescription" placeholder="Description"></textarea>
+    <button onclick="addTodo()">Add</button>
+</div>
+
+</div>
+
+<script>
+    const addTodoBtn = document.getElementById('addTodoBtn');
+    const popup = document.getElementById('popup');
+    const todoTitle = document.getElementById('todoTitle');
+    const todoDescription = document.getElementById('todoDescription');
+
+    addTodoBtn.addEventListener('click', () => {
+        popup.classList.add('show');
+        // Reset input fields
+        todoTitle.value = '';
+        todoDescription.value = '';
+    });
+
+    function closePopup() {
+        popup.classList.remove('show');
+    }
+
+    function addTodo() {
+        const title = todoTitle.value;
+        const description = todoDescription.value;
+        if (title && description) {
+            const todoList = document.querySelector('.todo-list');
+            const todoItem = document.createElement('div');
+            const currentDate = new Date().toLocaleDateString();
+            todoItem.classList.add('todo-item');
+            todoItem.innerHTML = `<div><h3>${title}</h3><p>${description}</p><span class="date">${currentDate}</span></div><button class="remove-btn" onclick="removeTodo(this)">Remove</button>`;
+            todoList.appendChild(todoItem);
+            closePopup();
+        } else {
+            alert('Please fill out both fields.');
+        }
+    }
+
+    function removeTodo(btn) {
+        const todoItem = btn.parentElement;
+        todoItem.remove();
+    }
+
+    /* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
+    function myFunction() {
+        const x = document.getElementById("myTopnav");
+        if (x.className === "topnav") {
+            x.className += " responsive";
+        } else {
+            x.className = "topnav";
+        }
+    }
+</script>
+
+</body>
+</html>
